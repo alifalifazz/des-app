@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Simulasi Web DES (Data Encryption Standard)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>🔐 Simulasi Web Algoritma DES (Data Encryption Standard)</h1>
+  <p>Visualisasi lengkap: Key Schedule (PC-1, C/D, Shift, PC-2), Initial Permutation, 16 Round Feistel (E, XOR, S-Box, P), dan IP⁻¹.</p>
+</header>
+
+<div class="container">
+
+  <!-- ===================== INPUT PANEL ===================== -->
+  <div class="panel">
+    <h2>1. Input</h2>
+    <div class="input-grid">
+      <div class="field">
+        <label for="inputText">Plaintext / Ciphertext (64-bit)</label>
+        <input type="text" id="inputText" placeholder="Contoh hex: 0123456789ABCDEF">
+      </div>
+      <div class="field">
+        <label for="keyText">Kunci (64-bit)</label>
+        <input type="text" id="keyText" placeholder="Contoh hex: 133457799BBCDFF1">
+      </div>
+
+      <div class="field">
+        <label>Format Input</label>
+        <div class="radio-group">
+          <label><input type="radio" name="format" value="hex" checked> Heksadesimal (16 digit)</label>
+          <label><input type="radio" name="format" value="bin"> Biner (64 bit)</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Mode Operasi</label>
+        <div class="radio-group">
+          <label><input type="radio" name="mode" value="encrypt" checked> Enkripsi</label>
+          <label><input type="radio" name="mode" value="decrypt"> Dekripsi</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-row">
+      <button class="primary" id="btnRun">▶ Jalankan DES</button>
+      <button class="secondary" id="btnReset">⟲ Reset / Clear</button>
+      <button class="secondary" id="btnRoundTrip">⇄ Round-trip Test (Enkripsi↔Dekripsi)</button>
+    </div>
+    <div class="error-box" id="errorBox"></div>
+    <div id="roundTripNote"></div>
+  </div>
+
+  <!-- ===================== OUTPUT SUMMARY ===================== -->
+  <div class="panel">
+    <h2>2. Output Akhir</h2>
+    <div class="output-grid">
+      <div class="output-card">
+        <div class="label">Input</div>
+        <div class="value-hex" id="inSummaryHex">-</div>
+        <div class="value-bin" id="inSummaryBin">-</div>
+      </div>
+      <div class="output-card">
+        <div class="label">Kunci 64-bit</div>
+        <div class="value-hex" id="keySummaryHex">-</div>
+        <div class="value-bin" id="keySummaryBin">-</div>
+      </div>
+      <div class="output-card" style="grid-column: span 2;">
+        <div class="label">Output - Hexadecimal</div>
+        <div class="value-hex" id="outHex">-</div>
+        <div class="label" style="margin-top:8px;">Output - Biner</div>
+        <div class="value-bin" id="outBin">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TABS DETAIL PROSES ===================== -->
+  <div class="panel">
+    <h2>3. Detail Proses</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tabKeySchedule">Key Schedule (K1–K16)</button>
+      <button class="tab-btn" data-tab="tabRounds">IP &amp; 16 Round Feistel</button>
+      <button class="tab-btn" data-tab="tabSbox">Tabel Referensi S-Box</button>
+    </div>
+
+    <!-- TAB: KEY SCHEDULE -->
+    <div class="tab-content active" id="tabKeySchedule">
+      <div class="section-title-sm">Langkah Awal: PC-1, C0, D0</div>
+      <div id="pc1Flow"></div>
+
+      <div class="section-title-sm">Pembangkitan K1 – K16 (Shift + PC-2)</div>
+      <div class="table-wrap">
+        <table class="kstable">
+          <thead>
+            <tr>
+              <th>Round</th><th>Shift</th><th>Cn (28-bit)</th><th>Dn (28-bit)</th>
+              <th>Cn‖Dn (56-bit)</th><th>Kn = PC-2 (48-bit)</th><th>Kn (hex)</th>
+            </tr>
+          </thead>
+          <tbody id="keyScheduleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: IP & ROUNDS -->
+    <div class="tab-content" id="tabRounds">
+      <div class="section-title-sm">Initial Permutation (IP)</div>
+      <div id="ipSummary"></div>
+
+      <div class="section-title-sm">16 Round Feistel (klik tiap round untuk detail)</div>
+      <div id="roundsContainer"></div>
+
+      <div class="section-title-sm">Tahap Akhir: Swap Terakhir &amp; IP⁻¹</div>
+      <div id="finalSummary"></div>
+      <p class="note">
+        Catatan: setelah Round 16 <b>tidak</b> dilakukan swap tambahan — blok pre-output
+        langsung dibentuk sebagai R16‖L16, kemudian dipermutasi dengan IP⁻¹ untuk
+        menghasilkan output akhir (64-bit).
+      </p>
+    </div>
+
+    <!-- TAB: S-BOX REFERENCE -->
+    <div class="tab-content" id="tabSbox">
+      <p class="note">
+        Tabel referensi 8 S-Box DES (4 baris × 16 kolom). Baris ditentukan oleh bit ke-1 &amp; ke-6
+        dari blok 6-bit, kolom ditentukan oleh bit ke-2 sampai ke-5. Nilai hasil lookup pada
+        setiap round ditampilkan secara rinci di tab "IP &amp; 16 Round Feistel".
+      </p>
+      <div id="sboxRefContainer"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Simulasi Web DES — Tugas Mata Kuliah Kriptografi.
+</footer>
+
+<script src="des-core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
